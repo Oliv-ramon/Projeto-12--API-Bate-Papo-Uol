@@ -1,40 +1,53 @@
 import express, { json } from "express";
 import cors from "cors";
-import joi from "joi";
+import dayjs from "dayjs";
+
 import mongoConnection from "./utils/mongoConnection.js";
+import validate from "./utils/validate.js";
+import validateDuplicity from "./utils/validateDuplicity.js";
 
 const app = express();
 app.use(json());
 app.use(cors());
 
-const participantSchema = joi.object({
-  name: joi.string().required().min(1),
-  laststatus: joi.number().required(),
-})
 
 app.post("/participants", async (req,res) => {
-  const validation = participantSchema.validate(req.body, {  abortEarly: false });
+  const validation = validate(req.body, res);
 
-  if (validation.error) {
-    const errorMessages = validation.error.details.map(({message}) => message);
-    res.status(422).send(`Validation error(s): ${errorMessages.join(", ")}`);
-    return;
-  }
+  if (!validation) return;
 
   try {
     const mongoClient = await mongoConnection();
 
     const participantsCollection = mongoClient.db("Bate-Papo_Uol").collection("participants");
-    await participantsCollection.insertOne(req.body);
-    const participants = await participantsCollection.find({}).toArray();
 
-    res.send(participants);
+    const participantAlredyExist = await validateDuplicity(participantsCollection, { name: req.body.name }, res);
+    if (participantAlredyExist) return;
+
+
+    await participantsCollection.insertOne({ ...req.body, lastStatus: Date.now() });
+
+    const messagesCollection = mongoClient.db("Bate-Papo_Uol").collection("messages");
+    await messagesCollection.insertOne(
+      {
+        from: req.body.name, 
+        to: 'Todos', 
+        text: 'entra na sala...', 
+        type: 'status', 
+        time: dayjs().locale("br").format('HH:mm:ss'),
+      }
+    )
+    console.log(dayjs().format('HH:mm:ss'))
+
+    res.sendStatus(201);
     mongoClient.close();
   } catch (error) {
     console.log(error)
     res.sendStatus(500);
   }
-})
+});
+
+
 
 
 app.listen(5000, console.log("Running in http://localhost:5000"))

@@ -19,6 +19,7 @@
   },
   "homepage": "https://github.com/Oliv-ramon/Projeto-12--API-Bate-Papo-Uol#readme",
   "dependencies": {
+    "dayjs": "^1.10.7",
     "dotenv": "^14.3.2",
     "express": "^4.17.2",
     "joi": "^17.6.0",
