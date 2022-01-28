@@ -1,0 +1,30 @@
+{
+  "name": "projeto_12_api_bate-papo_uol",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon ./src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Oliv-ramon/Projeto-12--API-Bate-Papo-Uol.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Oliv-ramon/Projeto-12--API-Bate-Papo-Uol/issues"
+  },
+  "homepage": "https://github.com/Oliv-ramon/Projeto-12--API-Bate-Papo-Uol#readme",
+  "dependencies": {
+    "dotenv": "^14.3.2",
+    "express": "^4.17.2",
+    "mongodb": "^4.3.1"
+  },
+  "devDependencies": {
+    "cors": "^2.8.5",
+    "nodemon": "^2.0.15"
+  }
+}
