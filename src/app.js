@@ -3,7 +3,7 @@ import cors from "cors";
 import dayjs from "dayjs";
 
 import mongoConnection from "./utils/mongoConnection.js";
-import validate from "./utils/validate.js";
+import { validateParticipant, validateMessage } from "./utils/validations.js";
 import validateDuplicity from "./utils/validateDuplicity.js";
 
 const app = express();
@@ -12,9 +12,8 @@ app.use(cors());
 
 
 app.post("/participants", async (req,res) => {
-  const validation = validate(req.body, res);
-
-  if (!validation) return;
+  const validation = validateParticipant(req.body, res);
+  if (validation) return;
 
   try {
     const mongoClient = await mongoConnection();
@@ -36,8 +35,7 @@ app.post("/participants", async (req,res) => {
         type: 'status', 
         time: dayjs().locale("br").format('HH:mm:ss'),
       }
-    )
-    console.log(dayjs().format('HH:mm:ss'))
+    );
 
     res.sendStatus(201);
     mongoClient.close();
@@ -46,6 +44,44 @@ app.post("/participants", async (req,res) => {
     res.sendStatus(500);
   }
 });
+
+app.get("/participants", async (req,res) => {
+  try {
+    const mongoClient = await mongoConnection();
+
+    const participantsCollection = mongoClient.db("Bate-Papo_Uol").collection("participants");
+
+    const participants = await participantsCollection.find({}).toArray();
+
+    res.status(200).send(participants);
+    mongoClient.close();
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500);
+  }
+});
+
+app.post("/messages", async  (req, res) => {
+  const message = { ...req.body, from: req.headers.user };
+  
+  const validation = await validateMessage(message, res);
+  console.log(validation)
+  if (validation) return;
+
+  try {
+    const mongoClient = await mongoConnection();
+
+    const messagesCollection = mongoClient.db("Bate-Papo_Uol").collection("messages");
+
+    await messagesCollection.insertOne({ ...message, time: dayjs().locale("br").format('HH:mm:ss') });
+
+    res.sendStatus(201);
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500);
+  }
+  
+})
 
 
 
