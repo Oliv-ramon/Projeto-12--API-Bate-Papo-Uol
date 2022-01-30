@@ -80,10 +80,34 @@ app.post("/messages", async  (req, res) => {
     console.log(error)
     res.sendStatus(500);
   }
+});
+
+app.get("/messages", async (req,res) => {
+  const user = req.headers.user;
+  const limit = req.query.limit;
   
-})
+  try {
+    const mongoClient = await mongoConnection();
 
+    const messagesCollection = mongoClient.db("Bate-Papo_Uol").collection("messages");
 
+    const messages = await messagesCollection.find({$or: [
+      { to: "Todos" }, 
+      { to: user },
+      { from: user }
+    ]}).toArray();
+
+    messages.reverse();
+
+    console.log(messages.reverse().slice(-limit))
+
+    res.status(200).send(messages.slice(-limit));
+    mongoClient.close();
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500);
+  }
+});
 
 
 app.listen(5000, console.log("Running in http://localhost:5000"))
