@@ -110,4 +110,25 @@ app.get("/messages", async (req,res) => {
 });
 
 
+app.post("/status", async (req, res) => {
+  try {
+    const mongoClient = await mongoConnection();
+
+    const participantsCollection = mongoClient.db("Bate-Papo_Uol").collection("participants");
+
+    const updatement = await participantsCollection.updateOne({ name: req.headers.user }, { $set: { name: req.headers.user, lastStatus: Date.now() } });
+
+    if (updatement.modifiedCount === 0) {
+      res.sendStatus(404);
+      return;
+    }
+
+    res.sendStatus(200);
+    mongoClient.close();
+  } catch (error) {
+    console.log(error)
+    res.sendStatus(500);
+  }
+});
+
 app.listen(5000, console.log("Running in http://localhost:5000"))

@@ -29,7 +29,7 @@ async function validateMessage(data, res) {
     to: joi.string().required(),
     text: joi.string().required(),
     type: joi.valid("message", "private_message").required(),
-    from: joi.valid().required(),
+    from: joi.valid(...participantsNames).required(),
   });
 
   const validation = messageSchema.validate(data, {  abortEarly: false });
