@@ -73,8 +73,13 @@ app.post("/messages", async  (req, res) => {
 
   try {
     const mongoClient = await mongoConnection();
-
     const messagesCollection = mongoClient.db("Bate-Papo_Uol").collection("messages");
+    const participantsCollection = mongoClient.db("Bate-Papo_Uol").collection("participants");
+
+    const userForFrom = await participantsCollection.findOne({ name: message.from });
+    console.log(userForFrom)
+    if (!userForFrom) return res.sendStatus(422);
+
 
     await messagesCollection.insertOne({ ...message, time: dayjs().locale("br").format('HH:mm:ss') });
 
