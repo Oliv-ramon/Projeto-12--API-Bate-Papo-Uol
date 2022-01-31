@@ -130,6 +130,7 @@ app.delete("/messages/:messageId", async (req, res) => {
     
     await messagesCollection.deleteOne({ _id: new ObjectId(id) });
     res.status(200).send("Deleted");
+    mongoClient.close();
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
@@ -160,6 +161,7 @@ app.put("/messages/:messageId", async (req, res) => {
     
     await messagesCollection.updateOne({ _id: new ObjectId(id) }, { $set: newMessage });
     res.status(200).send("Updated");
+    mongoClient.close();
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
